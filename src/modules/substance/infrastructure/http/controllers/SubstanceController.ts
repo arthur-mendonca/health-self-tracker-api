@@ -2,8 +2,8 @@ import { BadRequestException, Body, Controller, Get, Post } from "npm:@nestjs/co
 
 import { CreateSubstanceService } from "../../../application/use-cases/CreateSubstanceService.ts";
 import { ListSubstancesService } from "../../../application/use-cases/ListSubstancesService.ts";
-import { isSubstanceType, Substance } from "../../../domain/entities/Substance.ts";
-import type { CreateSubstanceDto } from "../dtos/CreateSubstanceDto.ts";
+import { Substance } from "../../../domain/entities/Substance.ts";
+import { CreateSubstanceDto } from "../dtos/CreateSubstanceDto.ts";
 
 @Controller("substances")
 export class SubstanceController {
@@ -20,10 +20,6 @@ export class SubstanceController {
 
   @Post()
   async create(@Body() body: CreateSubstanceDto) {
-    if (!isSubstanceType(body.type)) {
-      throw new BadRequestException("type is invalid.");
-    }
-
     try {
       const substance = await this.createSubstanceService.execute(body);
       return toResponse(substance);

@@ -3,7 +3,7 @@ import { BadRequestException, Body, Controller, Get, Post } from "npm:@nestjs/co
 import { GetTodayDailyRecordService } from "../../../application/use-cases/GetTodayDailyRecordService.ts";
 import { UpsertDailyRecordService } from "../../../application/use-cases/UpsertDailyRecordService.ts";
 import { DailyRecordHttpMapper } from "../mappers/DailyRecordHttpMapper.ts";
-import type { UpsertDailyRecordDto } from "../dtos/UpsertDailyRecordDto.ts";
+import { UpsertDailyRecordDto } from "../dtos/UpsertDailyRecordDto.ts";
 
 @Controller("records")
 export class DailyRecordController {

@@ -2,6 +2,8 @@ import { ulid } from "npm:ulid@3.0.1";
 
 export type SubstanceType = "MEDICATION" | "SUPPLEMENT";
 
+export const substanceTypes = ["MEDICATION", "SUPPLEMENT"] as const;
+
 type SubstanceProps = {
   id: string;
   name: string;
@@ -43,6 +45,5 @@ export class Substance {
 }
 
 export function isSubstanceType(value: unknown): value is SubstanceType {
-  return value === "MEDICATION" || value === "SUPPLEMENT";
+  return substanceTypes.includes(value as SubstanceType);
 }
-

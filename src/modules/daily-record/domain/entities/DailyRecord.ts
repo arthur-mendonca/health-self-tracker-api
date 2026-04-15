@@ -8,6 +8,8 @@ import { toDateOnly } from "../../../../shared/utils/date.ts";
 
 export type DropTime = "MORNING" | "AFTERNOON" | "EVENING" | "NONE";
 
+export const dropTimes = ["MORNING", "AFTERNOON", "EVENING", "NONE"] as const;
+
 export type DailySubstanceLogProps = {
   id: string;
   substance: Substance;
@@ -102,5 +104,5 @@ export function createDailyActivityLog(props: Omit<DailyActivityLogProps, "id">)
 }
 
 export function isDropTime(value: unknown): value is DropTime {
-  return value === "MORNING" || value === "AFTERNOON" || value === "EVENING" || value === "NONE";
+  return dropTimes.includes(value as DropTime);
 }

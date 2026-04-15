@@ -2,6 +2,8 @@ import { ulid } from "npm:ulid@3.0.1";
 
 export type TagCategory = "SYMPTOM" | "INTERFERENCE" | "TRIGGER" | "RESCUE" | "GENERAL";
 
+export const tagCategories = ["SYMPTOM", "INTERFERENCE", "TRIGGER", "RESCUE", "GENERAL"] as const;
+
 type TagProps = {
   id: string;
   name: string;
@@ -42,10 +44,5 @@ export class Tag {
 }
 
 export function isTagCategory(value: unknown): value is TagCategory {
-  return value === "SYMPTOM" ||
-    value === "INTERFERENCE" ||
-    value === "TRIGGER" ||
-    value === "RESCUE" ||
-    value === "GENERAL";
+  return tagCategories.includes(value as TagCategory);
 }
-

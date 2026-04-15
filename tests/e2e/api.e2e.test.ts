@@ -66,10 +66,65 @@ Deno.test("API supports resource lists, record upsert, today lookup, and dump ex
   const dump = await dumpResponse.json();
   assert.ok(Array.isArray(dump.records));
   assert.ok(dump.records.some((item: { date: string }) => item.date === "2099-04-15"));
+
+  const csvResponse = await fetch(`${baseUrl}/export/dump.csv`);
+  assert.equal(csvResponse.status, 200);
+  assert.ok(csvResponse.headers.get("content-type")?.includes("text/csv"));
+
+  const csv = await csvResponse.text();
+  assert.ok(csv.startsWith("\"id\",\"date\",\"metrics\""));
+  assert.ok(csv.includes("2099-04-15"));
+});
+
+Deno.test("API rejects invalid DTO payloads", async () => {
+  await assertBadRequest(`${baseUrl}/tags`, {
+    name: "",
+    category: "UNKNOWN"
+  });
+
+  await assertBadRequest(`${baseUrl}/substances`, {
+    name: "Invalid substance",
+    type: "UNKNOWN"
+  });
+
+  await assertBadRequest(`${baseUrl}/activities`, {
+    name: ""
+  });
+
+  await assertBadRequest(`${baseUrl}/records`, {
+    date: "not-a-date",
+    tags: [
+      {
+        name: "Invalid tag",
+        category: "UNKNOWN",
+        extra: true
+      }
+    ],
+    substances: [
+      {
+        name: "Invalid substance",
+        type: "SUPPLEMENT",
+        exactDose: ""
+      }
+    ]
+  });
 });
 
 async function assertOk(url: string): Promise<void> {
   const response = await fetch(url);
   assert.equal(response.status, 200);
+  await response.text();
+}
+
+async function assertBadRequest(url: string, body: unknown): Promise<void> {
+  const response = await fetch(url, {
+    method: "POST",
+    headers: {
+      "content-type": "application/json"
+    },
+    body: JSON.stringify(body)
+  });
+
+  assert.equal(response.status, 400);
   await response.text();
 }

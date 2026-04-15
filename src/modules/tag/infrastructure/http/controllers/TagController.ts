@@ -2,8 +2,8 @@ import { BadRequestException, Body, Controller, Get, Post } from "npm:@nestjs/co
 
 import { CreateTagService } from "../../../application/use-cases/CreateTagService.ts";
 import { ListTagsService } from "../../../application/use-cases/ListTagsService.ts";
-import { isTagCategory, Tag } from "../../../domain/entities/Tag.ts";
-import type { CreateTagDto } from "../dtos/CreateTagDto.ts";
+import { Tag } from "../../../domain/entities/Tag.ts";
+import { CreateTagDto } from "../dtos/CreateTagDto.ts";
 
 @Controller("tags")
 export class TagController {
@@ -20,10 +20,6 @@ export class TagController {
 
   @Post()
   async create(@Body() body: CreateTagDto) {
-    if (body.category !== undefined && !isTagCategory(body.category)) {
-      throw new BadRequestException("category is invalid.");
-    }
-
     try {
       const tag = await this.createTagService.execute(body);
       return toResponse(tag);

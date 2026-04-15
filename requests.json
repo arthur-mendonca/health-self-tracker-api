@@ -137,6 +137,13 @@
             "method": "GET",
             "url": "{{baseUrl}}/export/dump"
           }
+        },
+        {
+          "name": "Dump CSV",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/export/dump.csv"
+          }
         }
       ]
     }

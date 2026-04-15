@@ -23,7 +23,41 @@ export class ExportDumpService implements ExportDumpUseCase {
       records: records.map(toDumpRecord)
     };
   }
+
+  async executeCsv(): Promise<string> {
+    const dump = await this.execute();
+    const headers = [
+      "id",
+      "date",
+      "metrics",
+      "structuredNotes",
+      "tags",
+      "substances",
+      "activities",
+      "createdAt",
+      "updatedAt"
+    ];
+
+    const rows = dump.records.map((record) => {
+      const dumpRecord = record as DumpRecord;
+      return [
+        dumpRecord.id,
+        dumpRecord.date,
+        toJsonCell(dumpRecord.metrics),
+        toJsonCell(dumpRecord.structuredNotes),
+        toJsonCell(dumpRecord.tags),
+        toJsonCell(dumpRecord.substances),
+        toJsonCell(dumpRecord.activities),
+        dumpRecord.createdAt ?? "",
+        dumpRecord.updatedAt ?? ""
+      ];
+    });
+
+    return [headers, ...rows].map(toCsvRow).join("\n") + "\n";
+  }
 }
+
+type DumpRecord = ReturnType<typeof toDumpRecord>;
 
 function toDumpRecord(record: DailyRecord) {
   return {
@@ -51,4 +85,17 @@ function toDumpRecord(record: DailyRecord) {
     createdAt: record.createdAt?.toISOString(),
     updatedAt: record.updatedAt?.toISOString()
   };
+}
+
+function toJsonCell(value: unknown): string {
+  return value == null ? "" : JSON.stringify(value);
+}
+
+function toCsvRow(values: unknown[]): string {
+  return values.map(toCsvCell).join(",");
+}
+
+function toCsvCell(value: unknown): string {
+  const text = String(value ?? "");
+  return `"${text.replaceAll("\"", "\"\"")}"`;
 }

@@ -1,6 +1,6 @@
 import { Inject, Injectable } from "npm:@nestjs/common@10.4.15";
 
-import { toDateOnly } from "../../../../shared/utils/date.ts";
+import { todayDateOnlyInSaoPaulo } from "../../../../shared/utils/date.ts";
 import { DailyRecord } from "../../domain/entities/DailyRecord.ts";
 import type { GetTodayDailyRecordUseCase } from "../ports/in/GetTodayDailyRecordUseCase.ts";
 import {
@@ -16,6 +16,6 @@ export class GetTodayDailyRecordService implements GetTodayDailyRecordUseCase {
   ) {}
 
   async execute(): Promise<DailyRecord | null> {
-    return await this.dailyRecordRepository.findByDate(toDateOnly(new Date()));
+    return await this.dailyRecordRepository.findByDate(todayDateOnlyInSaoPaulo());
   }
 }

@@ -3,7 +3,7 @@ import { BadRequestException, Body, Controller, Get, Post } from "npm:@nestjs/co
 import { CreateActivityService } from "../../../application/use-cases/CreateActivityService.ts";
 import { ListActivitiesService } from "../../../application/use-cases/ListActivitiesService.ts";
 import { Activity } from "../../../domain/entities/Activity.ts";
-import type { CreateActivityDto } from "../dtos/CreateActivityDto.ts";
+import { CreateActivityDto } from "../dtos/CreateActivityDto.ts";
 
 @Controller("activities")
 export class ActivityController {
