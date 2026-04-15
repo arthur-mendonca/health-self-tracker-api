@@ -1,15 +1,31 @@
-import { BadRequestException, Body, Controller, Get, Post } from "npm:@nestjs/common@10.4.15";
+import {
+  BadRequestException,
+  Body,
+  Controller,
+  Delete,
+  Get,
+  HttpCode,
+  NotFoundException,
+  Param,
+  Patch,
+  Post
+} from "npm:@nestjs/common@10.4.15";
 
 import { CreateSubstanceService } from "../../../application/use-cases/CreateSubstanceService.ts";
+import { DeleteSubstanceService } from "../../../application/use-cases/DeleteSubstanceService.ts";
 import { ListSubstancesService } from "../../../application/use-cases/ListSubstancesService.ts";
+import { UpdateSubstanceService } from "../../../application/use-cases/UpdateSubstanceService.ts";
 import { Substance } from "../../../domain/entities/Substance.ts";
 import { CreateSubstanceDto } from "../dtos/CreateSubstanceDto.ts";
+import { UpdateSubstanceDto } from "../dtos/UpdateSubstanceDto.ts";
 
 @Controller("substances")
 export class SubstanceController {
   constructor(
     private readonly createSubstanceService: CreateSubstanceService,
-    private readonly listSubstancesService: ListSubstancesService
+    private readonly listSubstancesService: ListSubstancesService,
+    private readonly updateSubstanceService: UpdateSubstanceService,
+    private readonly deleteSubstanceService: DeleteSubstanceService
   ) {}
 
   @Get()
@@ -25,6 +41,38 @@ export class SubstanceController {
       return toResponse(substance);
     } catch (error) {
       throw new BadRequestException(error instanceof Error ? error.message : "Invalid substance payload.");
+    }
+  }
+
+  @Patch(":id")
+  async update(@Param("id") id: string, @Body() body: UpdateSubstanceDto) {
+    try {
+      const substance = await this.updateSubstanceService.execute({
+        id,
+        ...body
+      });
+
+      if (!substance) {
+        throw new NotFoundException("Substance not found.");
+      }
+
+      return toResponse(substance);
+    } catch (error) {
+      if (error instanceof NotFoundException) {
+        throw error;
+      }
+
+      throw new BadRequestException(error instanceof Error ? error.message : "Invalid substance payload.");
+    }
+  }
+
+  @Delete(":id")
+  @HttpCode(204)
+  async delete(@Param("id") id: string) {
+    const deleted = await this.deleteSubstanceService.execute(id);
+
+    if (!deleted) {
+      throw new NotFoundException("Substance not found.");
     }
   }
 }

@@ -18,6 +18,168 @@ Deno.test("API supports resource lists, record upsert, today lookup, and dump ex
   await assertOk(`${baseUrl}/substances`, token);
   await assertOk(`${baseUrl}/activities`, token);
 
+  const tagName = `E2E CRUD Tag ${Date.now()}`;
+  const createTagResponse = await fetch(`${baseUrl}/tags`, {
+    method: "POST",
+    headers: {
+      "authorization": `Bearer ${token}`,
+      "content-type": "application/json"
+    },
+    body: JSON.stringify({
+      name: tagName,
+      category: "GENERAL"
+    })
+  });
+  assert.equal(createTagResponse.status, 201);
+
+  const createdTag = await createTagResponse.json();
+  assert.match(createdTag.id, /^[0-9A-HJKMNP-TV-Z]{26}$/);
+  assert.equal(createdTag.name, tagName);
+
+  const updateTagResponse = await fetch(`${baseUrl}/tags/${createdTag.id}`, {
+    method: "PATCH",
+    headers: {
+      "authorization": `Bearer ${token}`,
+      "content-type": "application/json"
+    },
+    body: JSON.stringify({
+      name: `${tagName} Updated`,
+      category: "TRIGGER"
+    })
+  });
+  assert.equal(updateTagResponse.status, 200);
+
+  const updatedTag = await updateTagResponse.json();
+  assert.equal(updatedTag.id, createdTag.id);
+  assert.equal(updatedTag.name, `${tagName} Updated`);
+  assert.equal(updatedTag.category, "TRIGGER");
+
+  const deleteTagResponse = await fetch(`${baseUrl}/tags/${createdTag.id}`, {
+    method: "DELETE",
+    headers: {
+      "authorization": `Bearer ${token}`
+    }
+  });
+  assert.equal(deleteTagResponse.status, 204);
+  await deleteTagResponse.text();
+
+  const missingDeleteTagResponse = await fetch(`${baseUrl}/tags/${createdTag.id}`, {
+    method: "DELETE",
+    headers: {
+      "authorization": `Bearer ${token}`
+    }
+  });
+  assert.equal(missingDeleteTagResponse.status, 404);
+  await missingDeleteTagResponse.text();
+
+  const substanceName = `E2E CRUD Substance ${Date.now()}`;
+  const createSubstanceResponse = await fetch(`${baseUrl}/substances`, {
+    method: "POST",
+    headers: {
+      "authorization": `Bearer ${token}`,
+      "content-type": "application/json"
+    },
+    body: JSON.stringify({
+      name: substanceName,
+      type: "SUPPLEMENT",
+      defaultDose: "200mg"
+    })
+  });
+  assert.equal(createSubstanceResponse.status, 201);
+
+  const createdSubstance = await createSubstanceResponse.json();
+  assert.match(createdSubstance.id, /^[0-9A-HJKMNP-TV-Z]{26}$/);
+  assert.equal(createdSubstance.name, substanceName);
+
+  const updateSubstanceResponse = await fetch(`${baseUrl}/substances/${createdSubstance.id}`, {
+    method: "PATCH",
+    headers: {
+      "authorization": `Bearer ${token}`,
+      "content-type": "application/json"
+    },
+    body: JSON.stringify({
+      name: `${substanceName} Updated`,
+      type: "MEDICATION",
+      defaultDose: "400mg"
+    })
+  });
+  assert.equal(updateSubstanceResponse.status, 200);
+
+  const updatedSubstance = await updateSubstanceResponse.json();
+  assert.equal(updatedSubstance.id, createdSubstance.id);
+  assert.equal(updatedSubstance.name, `${substanceName} Updated`);
+  assert.equal(updatedSubstance.type, "MEDICATION");
+  assert.equal(updatedSubstance.defaultDose, "400mg");
+
+  const deleteSubstanceResponse = await fetch(`${baseUrl}/substances/${createdSubstance.id}`, {
+    method: "DELETE",
+    headers: {
+      "authorization": `Bearer ${token}`
+    }
+  });
+  assert.equal(deleteSubstanceResponse.status, 204);
+  await deleteSubstanceResponse.text();
+
+  const missingDeleteSubstanceResponse = await fetch(`${baseUrl}/substances/${createdSubstance.id}`, {
+    method: "DELETE",
+    headers: {
+      "authorization": `Bearer ${token}`
+    }
+  });
+  assert.equal(missingDeleteSubstanceResponse.status, 404);
+  await missingDeleteSubstanceResponse.text();
+
+  const activityName = `E2E CRUD Activity ${Date.now()}`;
+  const createActivityResponse = await fetch(`${baseUrl}/activities`, {
+    method: "POST",
+    headers: {
+      "authorization": `Bearer ${token}`,
+      "content-type": "application/json"
+    },
+    body: JSON.stringify({
+      name: activityName
+    })
+  });
+  assert.equal(createActivityResponse.status, 201);
+
+  const createdActivity = await createActivityResponse.json();
+  assert.match(createdActivity.id, /^[0-9A-HJKMNP-TV-Z]{26}$/);
+  assert.equal(createdActivity.name, activityName);
+
+  const updateActivityResponse = await fetch(`${baseUrl}/activities/${createdActivity.id}`, {
+    method: "PATCH",
+    headers: {
+      "authorization": `Bearer ${token}`,
+      "content-type": "application/json"
+    },
+    body: JSON.stringify({
+      name: `${activityName} Updated`
+    })
+  });
+  assert.equal(updateActivityResponse.status, 200);
+
+  const updatedActivity = await updateActivityResponse.json();
+  assert.equal(updatedActivity.id, createdActivity.id);
+  assert.equal(updatedActivity.name, `${activityName} Updated`);
+
+  const deleteActivityResponse = await fetch(`${baseUrl}/activities/${createdActivity.id}`, {
+    method: "DELETE",
+    headers: {
+      "authorization": `Bearer ${token}`
+    }
+  });
+  assert.equal(deleteActivityResponse.status, 204);
+  await deleteActivityResponse.text();
+
+  const missingDeleteActivityResponse = await fetch(`${baseUrl}/activities/${createdActivity.id}`, {
+    method: "DELETE",
+    headers: {
+      "authorization": `Bearer ${token}`
+    }
+  });
+  assert.equal(missingDeleteActivityResponse.status, 404);
+  await missingDeleteActivityResponse.text();
+
   const recordResponse = await fetch(`${baseUrl}/records`, {
     method: "POST",
     headers: {

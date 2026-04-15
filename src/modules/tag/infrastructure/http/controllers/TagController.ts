@@ -1,15 +1,31 @@
-import { BadRequestException, Body, Controller, Get, Post } from "npm:@nestjs/common@10.4.15";
+import {
+  BadRequestException,
+  Body,
+  Controller,
+  Delete,
+  Get,
+  HttpCode,
+  NotFoundException,
+  Param,
+  Patch,
+  Post
+} from "npm:@nestjs/common@10.4.15";
 
 import { CreateTagService } from "../../../application/use-cases/CreateTagService.ts";
+import { DeleteTagService } from "../../../application/use-cases/DeleteTagService.ts";
 import { ListTagsService } from "../../../application/use-cases/ListTagsService.ts";
+import { UpdateTagService } from "../../../application/use-cases/UpdateTagService.ts";
 import { Tag } from "../../../domain/entities/Tag.ts";
 import { CreateTagDto } from "../dtos/CreateTagDto.ts";
+import { UpdateTagDto } from "../dtos/UpdateTagDto.ts";
 
 @Controller("tags")
 export class TagController {
   constructor(
     private readonly createTagService: CreateTagService,
-    private readonly listTagsService: ListTagsService
+    private readonly listTagsService: ListTagsService,
+    private readonly updateTagService: UpdateTagService,
+    private readonly deleteTagService: DeleteTagService
   ) {}
 
   @Get()
@@ -25,6 +41,38 @@ export class TagController {
       return toResponse(tag);
     } catch (error) {
       throw new BadRequestException(error instanceof Error ? error.message : "Invalid tag payload.");
+    }
+  }
+
+  @Patch(":id")
+  async update(@Param("id") id: string, @Body() body: UpdateTagDto) {
+    try {
+      const tag = await this.updateTagService.execute({
+        id,
+        ...body
+      });
+
+      if (!tag) {
+        throw new NotFoundException("Tag not found.");
+      }
+
+      return toResponse(tag);
+    } catch (error) {
+      if (error instanceof NotFoundException) {
+        throw error;
+      }
+
+      throw new BadRequestException(error instanceof Error ? error.message : "Invalid tag payload.");
+    }
+  }
+
+  @Delete(":id")
+  @HttpCode(204)
+  async delete(@Param("id") id: string) {
+    const deleted = await this.deleteTagService.execute(id);
+
+    if (!deleted) {
+      throw new NotFoundException("Tag not found.");
     }
   }
 }

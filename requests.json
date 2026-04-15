@@ -75,6 +75,40 @@
             },
             "url": "{{baseUrl}}/tags"
           }
+        },
+        {
+          "name": "Update tag",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Migraine\",\n  \"category\": \"TRIGGER\"\n}"
+            },
+            "url": "{{baseUrl}}/tags/:id"
+          }
+        },
+        {
+          "name": "Delete tag",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "url": "{{baseUrl}}/tags/:id"
+          }
         }
       ]
     },
@@ -114,6 +148,40 @@
             },
             "url": "{{baseUrl}}/substances"
           }
+        },
+        {
+          "name": "Update substance",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Ibuprofen\",\n  \"type\": \"MEDICATION\",\n  \"defaultDose\": \"400mg\"\n}"
+            },
+            "url": "{{baseUrl}}/substances/:id"
+          }
+        },
+        {
+          "name": "Delete substance",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "url": "{{baseUrl}}/substances/:id"
+          }
         }
       ]
     },
@@ -152,6 +220,40 @@
               "raw": "{\n  \"name\": \"Walk\"\n}"
             },
             "url": "{{baseUrl}}/activities"
+          }
+        },
+        {
+          "name": "Update activity",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Run\"\n}"
+            },
+            "url": "{{baseUrl}}/activities/:id"
+          }
+        },
+        {
+          "name": "Delete activity",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "url": "{{baseUrl}}/activities/:id"
           }
         }
       ]
