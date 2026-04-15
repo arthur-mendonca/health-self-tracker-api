@@ -9,6 +9,9 @@
     "dev": "deno run --allow-all --watch src/main.ts",
     "start": "deno run --allow-all src/main.ts",
     "prisma:generate": "deno run -A npm:prisma@7.7.0 generate",
-    "prisma:db-push": "deno run -A npm:prisma@7.7.0 db push"
+    "prisma:migrate:dev": "deno run -A npm:prisma@7.7.0 migrate dev",
+    "prisma:migrate:deploy": "deno run -A npm:prisma@7.7.0 migrate deploy",
+    "test": "deno test --allow-env tests/unit",
+    "test:e2e": "deno test --allow-env --allow-net tests/e2e"
   }
 }

@@ -18,8 +18,8 @@
 
 ## Fase 3: Hardening do Back-end
 
-- [ ] Adicionar testes automatizados para casos de uso, controllers e repositórios críticos.
-- [ ] Substituir o fluxo baseado somente em `prisma db push` por migrations versionadas do Prisma.
+- [x] Adicionar testes automatizados para casos de uso, controllers e repositórios críticos.
+- [x] Substituir o fluxo baseado somente em `prisma db push` por migrations versionadas do Prisma.
 - [ ] Fortalecer validação dos DTOs com `ValidationPipe` e DTOs robustos.
 - [ ] Ajustar `GET /records/today` para usar `America/Sao_Paulo` em vez de UTC.
 - [ ] Adicionar suporte a CSV estruturado em `/export/dump` ou rota equivalente de exportação.

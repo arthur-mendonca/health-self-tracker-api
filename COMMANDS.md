@@ -65,10 +65,16 @@ Gerar Prisma Client:
 deno task prisma:generate
 ```
 
-Aplicar o schema no banco configurado em `DATABASE_URL`:
+Criar uma nova migration a partir de mudanças no `schema.prisma`:
 
 ```bash
-deno task prisma:db-push
+deno task prisma:migrate:dev --name nome_da_migration
+```
+
+Aplicar migrations pendentes no banco configurado em `DATABASE_URL`:
+
+```bash
+deno task prisma:migrate:deploy
 ```
 
 Rodar em modo desenvolvimento:
@@ -88,17 +94,39 @@ deno task start
 O container executa:
 
 ```bash
-deno task start
+deno task prisma:migrate:deploy && deno task start
 ```
 
 O Prisma Client é gerado durante o build da imagem.
 
-Depois de subir o banco, aplique o schema:
+Para aplicar migrations manualmente no container:
 
 ```bash
-docker compose exec api deno task prisma:db-push
+docker compose exec api deno task prisma:migrate:deploy
 ```
 
 ## Testes
 
-Ainda não há suíte de testes configurada nesta Fase 1. Quando os testes forem adicionados, este arquivo deve ser atualizado com o comando oficial.
+Rodar testes unitários localmente:
+
+```bash
+deno task test
+```
+
+Rodar testes e2e localmente com a API ativa:
+
+```bash
+deno task test:e2e
+```
+
+Rodar testes unitários pelo container:
+
+```bash
+docker compose exec api deno task test
+```
+
+Rodar testes e2e pelo container:
+
+```bash
+docker compose exec api deno task test:e2e
+```
