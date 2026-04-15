@@ -77,6 +77,15 @@ model DailyActivity {
   activity Activity    @relation(fields: [activityId], references: [id])
 }
 
+model AuthUser {
+  id           String   @id
+  email        String   @unique
+  passwordHash String
+  passwordSalt String
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
 // 5. ENUMS DE APOIO
 enum TagCategory {
   SYMPTOM

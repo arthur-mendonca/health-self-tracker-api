@@ -1,15 +1,27 @@
 import assert from "node:assert/strict";
 
 const baseUrl = Deno.env.get("API_BASE_URL") ?? "http://localhost:3000";
+const authEmail = Deno.env.get("AUTH_USER_EMAIL") ?? "user@example.com";
+const authPassword = Deno.env.get("AUTH_USER_PASSWORD") ?? "local-password";
+
+Deno.test("API protects business routes with verified JWT", async () => {
+  const response = await fetch(`${baseUrl}/tags`);
+
+  assert.equal(response.status, 401);
+  await response.text();
+});
 
 Deno.test("API supports resource lists, record upsert, today lookup, and dump export", async () => {
-  await assertOk(`${baseUrl}/tags`);
-  await assertOk(`${baseUrl}/substances`);
-  await assertOk(`${baseUrl}/activities`);
+  const token = await getApiToken();
+
+  await assertOk(`${baseUrl}/tags`, token);
+  await assertOk(`${baseUrl}/substances`, token);
+  await assertOk(`${baseUrl}/activities`, token);
 
   const recordResponse = await fetch(`${baseUrl}/records`, {
     method: "POST",
     headers: {
+      "authorization": `Bearer ${token}`,
       "content-type": "application/json"
     },
     body: JSON.stringify({
@@ -56,18 +68,18 @@ Deno.test("API supports resource lists, record upsert, today lookup, and dump ex
   assert.equal(record.substances[0].substance.name, "E2E Magnesium");
   assert.equal(record.activities[0].activity.name, "E2E Walk");
 
-  const todayResponse = await fetch(`${baseUrl}/records/today`);
+  const todayResponse = await fetch(`${baseUrl}/records/today`, authHeaders(token));
   assert.equal(todayResponse.status, 200);
   await todayResponse.text();
 
-  const dumpResponse = await fetch(`${baseUrl}/export/dump`);
+  const dumpResponse = await fetch(`${baseUrl}/export/dump`, authHeaders(token));
   assert.equal(dumpResponse.status, 200);
 
   const dump = await dumpResponse.json();
   assert.ok(Array.isArray(dump.records));
   assert.ok(dump.records.some((item: { date: string }) => item.date === "2099-04-15"));
 
-  const csvResponse = await fetch(`${baseUrl}/export/dump.csv`);
+  const csvResponse = await fetch(`${baseUrl}/export/dump.csv`, authHeaders(token));
   assert.equal(csvResponse.status, 200);
   assert.ok(csvResponse.headers.get("content-type")?.includes("text/csv"));
 
@@ -77,21 +89,23 @@ Deno.test("API supports resource lists, record upsert, today lookup, and dump ex
 });
 
 Deno.test("API rejects invalid DTO payloads", async () => {
-  await assertBadRequest(`${baseUrl}/tags`, {
+  const token = await getApiToken();
+
+  await assertBadRequest(`${baseUrl}/tags`, token, {
     name: "",
     category: "UNKNOWN"
   });
 
-  await assertBadRequest(`${baseUrl}/substances`, {
+  await assertBadRequest(`${baseUrl}/substances`, token, {
     name: "Invalid substance",
     type: "UNKNOWN"
   });
 
-  await assertBadRequest(`${baseUrl}/activities`, {
+  await assertBadRequest(`${baseUrl}/activities`, token, {
     name: ""
   });
 
-  await assertBadRequest(`${baseUrl}/records`, {
+  await assertBadRequest(`${baseUrl}/records`, token, {
     date: "not-a-date",
     tags: [
       {
@@ -110,16 +124,35 @@ Deno.test("API rejects invalid DTO payloads", async () => {
   });
 });
 
-async function assertOk(url: string): Promise<void> {
-  const response = await fetch(url);
+async function getApiToken(): Promise<string> {
+  const loginResponse = await fetch(`${baseUrl}/auth/login`, {
+    method: "POST",
+    headers: {
+      "content-type": "application/json"
+    },
+    body: JSON.stringify({
+      email: authEmail,
+      password: authPassword
+    })
+  });
+  assert.equal(loginResponse.status, 201);
+
+  const login = await loginResponse.json() as { token: string };
+  assert.ok(login.token);
+  return login.token;
+}
+
+async function assertOk(url: string, token: string): Promise<void> {
+  const response = await fetch(url, authHeaders(token));
   assert.equal(response.status, 200);
   await response.text();
 }
 
-async function assertBadRequest(url: string, body: unknown): Promise<void> {
+async function assertBadRequest(url: string, token: string, body: unknown): Promise<void> {
   const response = await fetch(url, {
     method: "POST",
     headers: {
+      "authorization": `Bearer ${token}`,
       "content-type": "application/json"
     },
     body: JSON.stringify(body)
@@ -127,4 +160,12 @@ async function assertBadRequest(url: string, body: unknown): Promise<void> {
 
   assert.equal(response.status, 400);
   await response.text();
+}
+
+function authHeaders(token: string): RequestInit {
+  return {
+    headers: {
+      "authorization": `Bearer ${token}`
+    }
+  };
 }

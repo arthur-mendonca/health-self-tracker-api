@@ -23,7 +23,7 @@
 - [x] Fortalecer validação dos DTOs com `ValidationPipe` e DTOs robustos.
 - [x] Ajustar `GET /records/today` para usar `America/Sao_Paulo` em vez de UTC.
 - [x] Adicionar suporte a CSV, PDF ou JSON estruturado em `/export/dump` ou rota equivalente de exportação.
-- [ ] Definir e implementar estratégia de autenticação para uso fora do ambiente local. A autenticação deve ser feita em duas etapas: primeiro, login com email e senha para obter um token JWT, e depois um código será enviado ao e-mail do user para validar o token. O token JWT deve ser incluído no header `Authorization` das requisições subsequentes para acessar as rotas protegidas da API.
+- [x] Definir e implementar estratégia de autenticação para uso fora do ambiente local.
 - [ ] Implementar uma estratégia de rate limiting para proteger a API contra abusos e ataques
 
 ## Fase 4: Validação do Back-end

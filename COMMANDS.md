@@ -17,6 +17,12 @@ No Docker Compose, a API usa:
 postgresql://health_tracker:health_tracker_password@db:5432/quantified_self
 ```
 
+Autenticação:
+
+- `JWT_SECRET`: segredo usado para assinar tokens JWT.
+- `AUTH_USER_EMAIL`: e-mail do usuário local inicial.
+- `AUTH_USER_PASSWORD`: senha do usuário local inicial.
+
 Para acesso local ao Postgres do container, use:
 
 ```text
