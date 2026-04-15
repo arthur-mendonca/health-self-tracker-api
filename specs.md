@@ -15,6 +15,8 @@ Aplicativo web de uso estritamente pessoal projetado para unificar o registro di
 - **Banco de Dados:** PostgreSQL (Híbrido: Relacional para Hard-Data + JSONB para Métricas Dinâmicas e Soft-Data).
 - **ORM:** Prisma ORM.
 
+* **Infraestrutura:** Docker e Docker Compose (para conteinerização isolada do Back-end e do Banco de Dados).
+
 ## 3. Diretrizes de UX/UI (Regras para o Front-end)
 
 - **Fricção Zero:** A entrada de dados deve ser agrupada em um log único por dia.
@@ -163,29 +165,12 @@ enum SubstanceType {
 - Aviso ao Agente de IA: PROIBIDO O USO DE MONOREPO. Você deve criar dois diretórios separados, independentes, sem nenhuma ferramenta de workspace (como npm workspaces ou nx).
 - **O Runtime alvo é o DENO**.
 
-### Fase 1: Setup do Back-end (Pasta backend-api)
+### Fase 1: Setup do Back-end, Banco de Dados e Docker (Pasta `backend-api`)
 
-Crie uma pasta estritamente dedicada chamada backend-api.
-Dentro de backend-api, inicialize um projeto NestJS padrão.
-Crie um arquivo deno.json no root de backend-api com a seguinte configuração mínima obrigatória para os decorators do NestJS funcionarem no Deno:
-code
-
-```
-JSON
-
-{
-"compilerOptions": {
-"experimentalDecorators": true,
-"emitDecoratorMetadata": true
-},
-"tasks": {
-"dev": "deno run --allow-all --watch src/main.ts"
-    }
-}
-```
-
-Configure o Prisma: Invoque os comandos do Prisma via Deno: deno run -A npm:prisma init, deno run -A npm:prisma generate. Aplique o schema.prisma.
-Use import { ulid } from "npm:ulid" nos Services.
+1.  Inicialize um projeto NestJS padrão, na raiz do projeto, com Deno (crie o `deno.json` conforme configurado acima).
+2.  Configure o Prisma e aplique o `schema.prisma`.
+3.  Crie um `Dockerfile` na raiz do `backend-api` utilizando uma imagem oficial do Deno (`denoland/deno:alpine` ou `debian`). O `Dockerfile` deve garantir que o Prisma Client seja gerado internamente (`deno run -A npm:prisma generate`) antes de rodar o comando de start.
+4.  Crie um arquivo `docker-compose.yml` na raiz do projeto contendo dois serviços: o banco de dados `postgres` e a aplicação `api` (buildando a partir do `Dockerfile`). Configure as redes e volumes adequadamente.
 
 ### Fase 2: Construção da API (NestJS)
 

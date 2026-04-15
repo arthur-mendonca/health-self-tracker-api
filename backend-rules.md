@@ -98,6 +98,15 @@ export class DailyRecordModule {}
 - Lembre-se que o ambiente é o Deno. Utilize deno.json para regras do TypeScript.
 - As classes de infraestrutura usarão bibliotecas, mas as classes de domain/ devem ser TypeScript vanilla.
 
+## 7. Regras de Infraestrutura (Docker e Deploy)
+
+A API deve ser totalmente conteinerizada. O agente de IA deve garantir que:
+
+- **Imagem Base:** Utilize a imagem oficial do Deno (ex: `denoland/deno:2.0.0` ou a mais recente compatível).
+- **Prisma no Docker:** O Prisma compila binários específicos do sistema operacional (Query Engine). O agente de IA deve configurar o `Dockerfile` para rodar `deno run -A npm:prisma generate` _durante o build_ da imagem, ou garantir que o `schema.prisma` possua os `binaryTargets` corretos para o SO do container (ex: `debian-openssl-3.0.x`).
+- **Variáveis de Ambiente:** O banco de dados no `docker-compose.yml` não deve estar exposto localmente em conflito com portas padrão (se necessário), e a `DATABASE_URL` no serviço da API deve apontar para o nome do serviço do banco de dados no compose (ex: `postgresql://user:pass@db:5432/quantified_self`).
+- **Execução:** O container deve inicializar a aplicação utilizando o comando do Deno (ex: `deno task start` ou `deno run --allow-all src/main.ts`).
+
 ### Como usar na prática com o Agente:
 
 Quando você for pedir para ele gerar o backend (Fase 1 ou 2 do `PROGRESS.md`), passe a instrução:

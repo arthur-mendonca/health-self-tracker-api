@@ -1,0 +1,94 @@
+generator client {
+  provider      = "prisma-client-js"
+  binaryTargets = ["native", "debian-openssl-3.0.x"]
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// 1. O NUCLEO: REGISTRO DIARIO
+model DailyRecord {
+  id              String  @id
+  date            DateTime @unique @db.Date
+  metrics         Json?   @db.JsonB
+  structuredNotes Json?   @db.JsonB
+
+  tags       Tag[]
+  substances DailySubstance[]
+  activities DailyActivity[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+// 2. SISTEMA DE TAGS DINAMICAS
+model Tag {
+  id        String      @id
+  name      String      @unique
+  category  TagCategory @default(GENERAL)
+  records   DailyRecord[]
+  createdAt DateTime    @default(now())
+}
+
+// 3. MAPEAMENTO DE SUBSTANCIAS
+model Substance {
+  id          String           @id
+  name        String           @unique
+  type        SubstanceType
+  defaultDose String?
+  log         DailySubstance[]
+}
+
+model DailySubstance {
+  id               String    @id
+  dailyRecordId    String
+  substanceId      String
+  exactDose        String
+  notes            String?   @db.Text
+  effectDropTime   DropTime?
+  experiencedCrash Boolean   @default(false)
+
+  record    DailyRecord @relation(fields: [dailyRecordId], references: [id], onDelete: Cascade)
+  substance Substance   @relation(fields: [substanceId], references: [id])
+
+  @@unique([dailyRecordId, substanceId])
+}
+
+// 4. MAPEAMENTO DE ATIVIDADE FISICA
+model Activity {
+  id   String @id
+  name String @unique
+  logs DailyActivity[]
+}
+
+model DailyActivity {
+  id            String  @id
+  dailyRecordId String
+  activityId    String
+  notes         String? @db.Text
+
+  record   DailyRecord @relation(fields: [dailyRecordId], references: [id], onDelete: Cascade)
+  activity Activity    @relation(fields: [activityId], references: [id])
+}
+
+// 5. ENUMS DE APOIO
+enum TagCategory {
+  SYMPTOM
+  INTERFERENCE
+  TRIGGER
+  RESCUE
+  GENERAL
+}
+
+enum DropTime {
+  MORNING
+  AFTERNOON
+  EVENING
+  NONE
+}
+
+enum SubstanceType {
+  MEDICATION
+  SUPPLEMENT
+}
