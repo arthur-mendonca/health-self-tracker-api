@@ -353,6 +353,32 @@
           }
         },
         {
+          "name": "Dump by date range",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "url": "{{baseUrl}}/export/dump?startDate=2026-04-01&endDate=2026-04-30"
+          }
+        },
+        {
+          "name": "Dump JSON download last 7 days",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "url": "{{baseUrl}}/export/dump.json?days=7"
+          }
+        },
+        {
           "name": "Dump CSV",
           "request": {
             "method": "GET",
@@ -363,6 +389,32 @@
               }
             ],
             "url": "{{baseUrl}}/export/dump.csv"
+          }
+        },
+        {
+          "name": "Dump TXT by date range",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "url": "{{baseUrl}}/export/dump.txt?startDate=2026-04-01&endDate=2026-04-30"
+          }
+        },
+        {
+          "name": "Dump PDF last 7 days",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "url": "{{baseUrl}}/export/dump.pdf?days=7"
           }
         }
       ]

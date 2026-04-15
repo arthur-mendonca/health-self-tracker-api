@@ -259,6 +259,16 @@ Deno.test("API supports resource lists, record upsert, today lookup, and dump ex
   assert.ok(Array.isArray(dump.records));
   assert.ok(dump.records.some((item: { date: string }) => item.date === "2099-04-15"));
 
+  const rangedDumpResponse = await fetch(
+    `${baseUrl}/export/dump?startDate=2099-04-01&endDate=2099-04-30`,
+    authHeaders(token)
+  );
+  assert.equal(rangedDumpResponse.status, 200);
+  const rangedDump = await rangedDumpResponse.json();
+  assert.equal(rangedDump.period.startDate, "2099-04-01");
+  assert.equal(rangedDump.period.endDate, "2099-04-30");
+  assert.ok(rangedDump.records.every((item: { date: string }) => item.date.startsWith("2099-04")));
+
   const csvResponse = await fetch(`${baseUrl}/export/dump.csv`, authHeaders(token));
   assert.equal(csvResponse.status, 200);
   assert.ok(csvResponse.headers.get("content-type")?.includes("text/csv"));
@@ -266,6 +276,30 @@ Deno.test("API supports resource lists, record upsert, today lookup, and dump ex
   const csv = await csvResponse.text();
   assert.ok(csv.startsWith("\"id\",\"date\",\"metrics\""));
   assert.ok(csv.includes("2099-04-15"));
+
+  const jsonResponse = await fetch(`${baseUrl}/export/dump.json?days=7`, authHeaders(token));
+  assert.equal(jsonResponse.status, 200);
+  assert.ok(jsonResponse.headers.get("content-type")?.includes("application/json"));
+  await jsonResponse.text();
+
+  const txtResponse = await fetch(
+    `${baseUrl}/export/dump.txt?startDate=2099-04-01&endDate=2099-04-30`,
+    authHeaders(token)
+  );
+  assert.equal(txtResponse.status, 200);
+  assert.ok(txtResponse.headers.get("content-type")?.includes("text/plain"));
+  const txt = await txtResponse.text();
+  assert.ok(txt.includes("Health Self Tracker Export"));
+  assert.ok(txt.includes("2099-04-15"));
+
+  const pdfResponse = await fetch(
+    `${baseUrl}/export/dump.pdf?startDate=2099-04-01&endDate=2099-04-30`,
+    authHeaders(token)
+  );
+  assert.equal(pdfResponse.status, 200);
+  assert.ok(pdfResponse.headers.get("content-type")?.includes("application/pdf"));
+  const pdf = new Uint8Array(await pdfResponse.arrayBuffer());
+  assert.equal(new TextDecoder().decode(pdf.slice(0, 8)), "%PDF-1.4");
 });
 
 Deno.test("API rejects invalid DTO payloads", async () => {
@@ -309,6 +343,13 @@ Deno.test("API rejects invalid DTO payloads", async () => {
   );
   assert.equal(invalidQueryResponse.status, 400);
   await invalidQueryResponse.text();
+
+  const invalidExportQueryResponse = await fetch(
+    `${baseUrl}/export/dump.pdf?days=0`,
+    authHeaders(token)
+  );
+  assert.equal(invalidExportQueryResponse.status, 400);
+  await invalidExportQueryResponse.text();
 });
 
 async function getApiToken(): Promise<string> {
