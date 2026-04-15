@@ -1,5 +1,6 @@
 import { Injectable } from "npm:@nestjs/common@10.4.15";
 
+import { Prisma } from "../../../../../generated/prisma/client.ts";
 import { PrismaService } from "../../../../../shared/infrastructure/prisma/prisma.service.ts";
 import { DailyRecord } from "../../../domain/entities/DailyRecord.ts";
 import type { DailyRecordRepositoryPort } from "../../../application/ports/out/DailyRecordRepositoryPort.ts";
@@ -17,7 +18,7 @@ const includeRelations = {
       activity: true
     }
   }
-} as const;
+} as const satisfies Prisma.DailyRecordInclude;
 
 @Injectable()
 export class PrismaDailyRecordRepository implements DailyRecordRepositoryPort {
@@ -29,8 +30,8 @@ export class PrismaDailyRecordRepository implements DailyRecordRepositoryPort {
       create: {
         id: record.id,
         date: record.date,
-        metrics: record.metrics,
-        structuredNotes: record.structuredNotes,
+        metrics: toNullableJsonInput(record.metrics),
+        structuredNotes: toNullableJsonInput(record.structuredNotes),
         tags: {
           connectOrCreate: record.tags.map((tag) => ({
             where: { name: tag.name },
@@ -78,8 +79,8 @@ export class PrismaDailyRecordRepository implements DailyRecordRepositoryPort {
         }
       },
       update: {
-        metrics: record.metrics,
-        structuredNotes: record.structuredNotes,
+        metrics: toNullableJsonInput(record.metrics),
+        structuredNotes: toNullableJsonInput(record.structuredNotes),
         tags: {
           set: [],
           connectOrCreate: record.tags.map((tag) => ({
@@ -144,6 +145,28 @@ export class PrismaDailyRecordRepository implements DailyRecordRepositoryPort {
     return model ? DailyRecordPrismaMapper.toDomain(model) : null;
   }
 
+  async findByDateRange(startDate?: Date, endDate?: Date): Promise<DailyRecord[]> {
+    const dateFilter: Prisma.DateTimeFilter = {};
+
+    if (startDate) {
+      dateFilter.gte = startDate;
+    }
+
+    if (endDate) {
+      dateFilter.lte = endDate;
+    }
+
+    const models = await this.prisma.dailyRecord.findMany({
+      where: {
+        date: dateFilter
+      },
+      orderBy: { date: "asc" },
+      include: includeRelations
+    });
+
+    return models.map(DailyRecordPrismaMapper.toDomain);
+  }
+
   async findAll(): Promise<DailyRecord[]> {
     const models = await this.prisma.dailyRecord.findMany({
       orderBy: { date: "asc" },
@@ -152,4 +175,8 @@ export class PrismaDailyRecordRepository implements DailyRecordRepositoryPort {
 
     return models.map(DailyRecordPrismaMapper.toDomain);
   }
+}
+
+function toNullableJsonInput(value: DailyRecord["metrics"]): Prisma.InputJsonValue | Prisma.NullableJsonNullValueInput {
+  return value === null ? Prisma.DbNull : value as Prisma.InputJsonValue;
 }

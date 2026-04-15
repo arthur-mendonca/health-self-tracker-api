@@ -68,6 +68,24 @@ Deno.test("API supports resource lists, record upsert, today lookup, and dump ex
   assert.equal(record.substances[0].substance.name, "E2E Magnesium");
   assert.equal(record.activities[0].activity.name, "E2E Walk");
 
+  const emptyDateResponse = await fetch(`${baseUrl}/records?date=1990-01-01`, authHeaders(token));
+  assert.equal(emptyDateResponse.status, 200);
+  assert.deepEqual(await emptyDateResponse.json(), []);
+
+  const byDateResponse = await fetch(`${baseUrl}/records?date=2099-04-15`, authHeaders(token));
+  assert.equal(byDateResponse.status, 200);
+  const byDate = await byDateResponse.json();
+  assert.equal(byDate.length, 1);
+  assert.equal(byDate[0].date, "2099-04-15");
+
+  const byRangeResponse = await fetch(
+    `${baseUrl}/records?startDate=2099-04-01&endDate=2099-04-30`,
+    authHeaders(token)
+  );
+  assert.equal(byRangeResponse.status, 200);
+  const byRange = await byRangeResponse.json();
+  assert.ok(byRange.some((item: { date: string }) => item.date === "2099-04-15"));
+
   const todayResponse = await fetch(`${baseUrl}/records/today`, authHeaders(token));
   assert.equal(todayResponse.status, 200);
   await todayResponse.text();
@@ -122,6 +140,13 @@ Deno.test("API rejects invalid DTO payloads", async () => {
       }
     ]
   });
+
+  const invalidQueryResponse = await fetch(
+    `${baseUrl}/records?date=2026-04-15&startDate=2026-04-01`,
+    authHeaders(token)
+  );
+  assert.equal(invalidQueryResponse.status, 400);
+  await invalidQueryResponse.text();
 });
 
 async function getApiToken(): Promise<string> {

@@ -5,5 +5,6 @@ export const DAILY_RECORD_REPOSITORY = "DailyRecordRepositoryPort";
 export interface DailyRecordRepositoryPort {
   upsert(record: DailyRecord): Promise<DailyRecord>;
   findByDate(date: Date): Promise<DailyRecord | null>;
+  findByDateRange(startDate?: Date, endDate?: Date): Promise<DailyRecord[]>;
   findAll(): Promise<DailyRecord[]>;
 }

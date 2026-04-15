@@ -160,6 +160,45 @@
       "name": "Records",
       "item": [
         {
+          "name": "List all records",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "url": "{{baseUrl}}/records"
+          }
+        },
+        {
+          "name": "List records by date",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "url": "{{baseUrl}}/records?date=1990-01-01"
+          }
+        },
+        {
+          "name": "List records by date range",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "url": "{{baseUrl}}/records?startDate=2026-04-01&endDate=2026-04-30"
+          }
+        },
+        {
           "name": "Upsert daily record",
           "request": {
             "method": "POST",

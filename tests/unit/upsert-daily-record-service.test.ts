@@ -80,8 +80,11 @@ class FakeDailyRecordRepository implements DailyRecordRepositoryPort {
     throw new Error("Not implemented.");
   }
 
+  findByDateRange(): Promise<DailyRecord[]> {
+    throw new Error("Not implemented.");
+  }
+
   findAll(): Promise<DailyRecord[]> {
     throw new Error("Not implemented.");
   }
 }
-
