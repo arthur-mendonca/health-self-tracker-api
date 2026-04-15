@@ -10,24 +10,24 @@
 
 ## Fase 2: Construção da API (NestJS)
 
-- [ ] Gerar os recursos Tag, Substance e Activity.
-- [ ] Implementar lógica nos Services para gerar ULIDs nativamente.
-- [ ] Desenvolver o DailyRecordService com lógica transacional para criar o log, relações n:n e salvar `metrics` como JSONB.
-- [ ] Implementar o ExportModule com `GET /export/dump`.
-- [ ] Configurar CORS no `main.ts` para permitir requisições do frontend.
+- [x] Gerar os recursos Tag, Substance e Activity.
+- [x] Implementar lógica nos Services para gerar ULIDs nativamente.
+- [x] Desenvolver o DailyRecordService com lógica transacional para criar o log, relações n:n e salvar `metrics` como JSONB.
+- [x] Implementar o ExportModule com `GET /export/dump`.
+- [x] Configurar CORS no `main.ts` para permitir requisições do frontend.
 
-## Fase 3: Setup e Construção do Front-end
+## Fase 3: Hardening do Back-end
 
-- [ ] Criar uma pasta independente `frontend-app`.
-- [ ] Inicializar um projeto SvelteKit do zero dentro de `frontend-app`.
-- [ ] Configurar task Deno para rodar o Vite.
-- [ ] Instalar e configurar Tailwind CSS.
-- [ ] Construir o formulário principal com métricas dinâmicas.
-- [ ] Criar selects inteligentes com autocompletar e criação on-the-fly.
+- [ ] Adicionar testes automatizados para casos de uso, controllers e repositórios críticos.
+- [ ] Substituir o fluxo baseado somente em `prisma db push` por migrations versionadas do Prisma.
+- [ ] Fortalecer validação dos DTOs com `ValidationPipe` e DTOs robustos.
+- [ ] Ajustar `GET /records/today` para usar `America/Sao_Paulo` em vez de UTC.
+- [ ] Adicionar suporte a CSV estruturado em `/export/dump` ou rota equivalente de exportação.
+- [ ] Definir e implementar estratégia de autenticação para uso fora do ambiente local.
 
-## Fase 4: Integração e Testes
+## Fase 4: Validação do Back-end
 
-- [ ] Executar backend e frontend independentemente com Deno.
-- [ ] Testar o fluxo ponta a ponta.
+- [ ] Testar o fluxo de API ponta a ponta somente no backend.
 - [ ] Verificar no Postgres se os IDs gerados são ULIDs válidos.
-- [ ] Validar o output da rota de Dump.
+- [ ] Validar o output JSON da rota de Dump.
+- [ ] Validar o output CSV da exportação quando implementado.

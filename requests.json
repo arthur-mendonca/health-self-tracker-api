@@ -11,5 +11,134 @@
       "type": "string"
     }
   ],
-  "item": []
+  "item": [
+    {
+      "name": "Tags",
+      "item": [
+        {
+          "name": "List tags",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/tags"
+          }
+        },
+        {
+          "name": "Create tag",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Headache\",\n  \"category\": \"SYMPTOM\"\n}"
+            },
+            "url": "{{baseUrl}}/tags"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Substances",
+      "item": [
+        {
+          "name": "List substances",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/substances"
+          }
+        },
+        {
+          "name": "Create substance",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Magnesium\",\n  \"type\": \"SUPPLEMENT\",\n  \"defaultDose\": \"200mg\"\n}"
+            },
+            "url": "{{baseUrl}}/substances"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Activities",
+      "item": [
+        {
+          "name": "List activities",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/activities"
+          }
+        },
+        {
+          "name": "Create activity",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Walk\"\n}"
+            },
+            "url": "{{baseUrl}}/activities"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Records",
+      "item": [
+        {
+          "name": "Upsert daily record",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"date\": \"2026-04-15\",\n  \"metrics\": {\n    \"energy\": 4,\n    \"sleepQuality\": 3\n  },\n  \"structuredNotes\": {\n    \"mood\": \"stable\",\n    \"focus\": \"deep work\"\n  },\n  \"tags\": [\n    {\n      \"name\": \"Headache\",\n      \"category\": \"SYMPTOM\"\n    }\n  ],\n  \"substances\": [\n    {\n      \"name\": \"Magnesium\",\n      \"type\": \"SUPPLEMENT\",\n      \"defaultDose\": \"200mg\",\n      \"exactDose\": \"200mg\",\n      \"effectDropTime\": \"NONE\",\n      \"experiencedCrash\": false\n    }\n  ],\n  \"activities\": [\n    {\n      \"name\": \"Walk\",\n      \"notes\": \"30 minutes\"\n    }\n  ]\n}"
+            },
+            "url": "{{baseUrl}}/records"
+          }
+        },
+        {
+          "name": "Get today record",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/records/today"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Export",
+      "item": [
+        {
+          "name": "Dump",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/export/dump"
+          }
+        }
+      ]
+    }
+  ]
 }

@@ -65,6 +65,12 @@ Gerar Prisma Client:
 deno task prisma:generate
 ```
 
+Aplicar o schema no banco configurado em `DATABASE_URL`:
+
+```bash
+deno task prisma:db-push
+```
+
 Rodar em modo desenvolvimento:
 
 ```bash
@@ -87,7 +93,12 @@ deno task start
 
 O Prisma Client é gerado durante o build da imagem.
 
+Depois de subir o banco, aplique o schema:
+
+```bash
+docker compose exec api deno task prisma:db-push
+```
+
 ## Testes
 
 Ainda não há suíte de testes configurada nesta Fase 1. Quando os testes forem adicionados, este arquivo deve ser atualizado com o comando oficial.
-
