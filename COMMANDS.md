@@ -37,10 +37,16 @@ Build da imagem:
 docker compose build
 ```
 
-Subir API e banco:
+Subir API e banco sem expor porta no host:
 
 ```bash
 docker compose up -d
+```
+
+Subir API e banco para teste local, expondo a API somente em `127.0.0.1:3000`:
+
+```bash
+docker compose -f docker-compose.yml -f docker-compose.local.yml up -d
 ```
 
 Ver logs da API:

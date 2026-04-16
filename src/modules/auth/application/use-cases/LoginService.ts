@@ -1,4 +1,4 @@
-import { Injectable, UnauthorizedException } from "npm:@nestjs/common@10.4.15";
+import { Injectable, Logger, UnauthorizedException } from "npm:@nestjs/common@10.4.15";
 
 import { getJwtSecret } from "../../../../shared/auth/auth.guard.ts";
 import { verifyPassword } from "../../../../shared/auth/password.ts";
@@ -12,6 +12,8 @@ export type LoginInput = {
 
 @Injectable()
 export class LoginService {
+  private readonly logger = new Logger(LoginService.name);
+
   constructor(private readonly prisma: PrismaService) {}
 
   async execute(input: LoginInput): Promise<{ token: string }> {
@@ -23,10 +25,12 @@ export class LoginService {
     });
 
     if (!user || !(await verifyPassword(input.password, user.passwordHash, user.passwordSalt))) {
+      this.logger.warn(`Login rejected for ${email}.`);
       throw new UnauthorizedException("Invalid email or password.");
     }
 
     const secret = getJwtSecret();
+    this.logger.log(`Login accepted for ${email}.`);
 
     return {
       token: await signJwt({
