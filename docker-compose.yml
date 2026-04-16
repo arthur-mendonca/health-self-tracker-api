@@ -2,15 +2,13 @@ services:
   db:
     image: postgres:16-alpine
     environment:
-      POSTGRES_DB: quantified_self
-      POSTGRES_USER: health_tracker
-      POSTGRES_PASSWORD: health_tracker_password
-    ports:
-      - "5433:5432"
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U health_tracker -d quantified_self"]
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
       interval: 5s
       timeout: 5s
       retries: 10
@@ -22,13 +20,11 @@ services:
       context: .
       dockerfile: Dockerfile
     environment:
-      DATABASE_URL: postgresql://health_tracker:health_tracker_password@db:5432/quantified_self
-      PORT: 3000
-      JWT_SECRET: local-development-secret-change-me
-      AUTH_USER_EMAIL: user@example.com
-      AUTH_USER_PASSWORD: local-password
-    ports:
-      - "3000:3000"
+      DATABASE_URL: ${DATABASE_URL}
+      PORT: ${PORT:-3000}
+      JWT_SECRET: ${JWT_SECRET}
+      AUTH_USER_EMAIL: ${AUTH_USER_EMAIL}
+      AUTH_USER_PASSWORD: ${AUTH_USER_PASSWORD}
     depends_on:
       db:
         condition: service_healthy
