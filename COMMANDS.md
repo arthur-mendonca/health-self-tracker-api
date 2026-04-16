@@ -22,6 +22,22 @@ Autenticação:
 - `JWT_SECRET`: segredo usado para assinar tokens JWT.
 - `AUTH_USER_EMAIL`: e-mail do usuário local inicial.
 - `AUTH_USER_PASSWORD`: senha do usuário local inicial.
+- `CORS_ORIGINS`: lista de origens permitidas separadas por vírgula. Em produção, use `https://health-front.gestorinvest.xyz`.
+- `AUTH_COOKIE_NAME`: nome do cookie de sessão. Padrão: `health_self_tracker_session`.
+- `AUTH_COOKIE_DOMAIN`: domínio compartilhado do cookie. Em produção, use `.gestorinvest.xyz` para compartilhar sessão entre API e front.
+- `AUTH_COOKIE_SECURE`: use `true` em produção HTTPS.
+- `AUTH_COOKIE_SAME_SITE`: use `none` em produção com subdomínios diferentes e `lax` em desenvolvimento local.
+- `AUTH_COOKIE_MAX_AGE_SECONDS`: duração do cookie em segundos. Padrão: `3600`.
+
+Para o deploy com API em `https://health.gestorinvest.xyz` e front em `https://health-front.gestorinvest.xyz`, configure:
+
+```text
+CORS_ORIGINS=https://health-front.gestorinvest.xyz
+AUTH_COOKIE_DOMAIN=.gestorinvest.xyz
+AUTH_COOKIE_SECURE=true
+AUTH_COOKIE_SAME_SITE=none
+AUTH_COOKIE_MAX_AGE_SECONDS=3600
+```
 
 Para acesso local ao Postgres do container, use:
 

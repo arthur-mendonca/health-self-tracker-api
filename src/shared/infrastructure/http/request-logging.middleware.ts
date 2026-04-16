@@ -36,7 +36,7 @@ export function requestLoggingMiddleware(
     const durationMs = Math.round((performance.now() - startedAt) * 100) / 100;
     const statusCode = response.statusCode;
     const payload = {
-      auth: request.headers.authorization ? "present" : "missing",
+      auth: request.headers.authorization || request.headers.cookie ? "present" : "missing",
       durationMs,
       ip: getFirstHeader(request.headers["x-forwarded-for"]) ?? request.ip,
       method: request.method,

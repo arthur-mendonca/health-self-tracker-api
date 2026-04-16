@@ -25,6 +25,12 @@ services:
       JWT_SECRET: ${JWT_SECRET}
       AUTH_USER_EMAIL: ${AUTH_USER_EMAIL}
       AUTH_USER_PASSWORD: ${AUTH_USER_PASSWORD}
+      CORS_ORIGINS: ${CORS_ORIGINS:-}
+      AUTH_COOKIE_NAME: ${AUTH_COOKIE_NAME:-health_self_tracker_session}
+      AUTH_COOKIE_DOMAIN: ${AUTH_COOKIE_DOMAIN:-}
+      AUTH_COOKIE_SECURE: ${AUTH_COOKIE_SECURE:-false}
+      AUTH_COOKIE_SAME_SITE: ${AUTH_COOKIE_SAME_SITE:-lax}
+      AUTH_COOKIE_MAX_AGE_SECONDS: ${AUTH_COOKIE_MAX_AGE_SECONDS:-3600}
     depends_on:
       db:
         condition: service_healthy

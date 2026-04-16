@@ -3,12 +3,99 @@ import assert from "node:assert/strict";
 const baseUrl = Deno.env.get("API_BASE_URL") ?? "http://localhost:3000";
 const authEmail = Deno.env.get("AUTH_USER_EMAIL") ?? "user@example.com";
 const authPassword = Deno.env.get("AUTH_USER_PASSWORD") ?? "local-password";
+const allowedOrigin = "http://localhost:5173";
 
 Deno.test("API protects business routes with verified JWT", async () => {
   const response = await fetch(`${baseUrl}/tags`);
 
   assert.equal(response.status, 401);
   await response.text();
+});
+
+Deno.test("API supports cookie sessions alongside bearer tokens", async () => {
+  const login = await getApiLogin();
+
+  assert.ok(login.token);
+  assert.match(login.setCookie, /health_self_tracker_session=/);
+  assert.match(login.setCookie, /HttpOnly/);
+
+  const bearerMeResponse = await fetch(`${baseUrl}/auth/me`, authHeaders(login.token));
+  assert.equal(bearerMeResponse.status, 200);
+  const bearerMe = await bearerMeResponse.json();
+  assert.equal(bearerMe.email, authEmail);
+
+  const cookieMeResponse = await fetch(`${baseUrl}/auth/me`, cookieHeaders(login.cookie));
+  assert.equal(cookieMeResponse.status, 200);
+  const cookieMe = await cookieMeResponse.json();
+  assert.equal(cookieMe.email, authEmail);
+
+  const cookieTagsResponse = await fetch(`${baseUrl}/tags`, cookieHeaders(login.cookie));
+  assert.equal(cookieTagsResponse.status, 200);
+  await cookieTagsResponse.text();
+
+  const tagName = `E2E Cookie Tag ${Date.now()}`;
+  const allowedWriteResponse = await fetch(`${baseUrl}/tags`, {
+    method: "POST",
+    headers: {
+      "content-type": "application/json",
+      "cookie": login.cookie,
+      "origin": allowedOrigin,
+    },
+    body: JSON.stringify({
+      name: tagName,
+      category: "GENERAL",
+    }),
+  });
+  assert.equal(allowedWriteResponse.status, 201);
+  const createdTag = await allowedWriteResponse.json();
+
+  const missingOriginResponse = await fetch(`${baseUrl}/tags`, {
+    method: "POST",
+    headers: {
+      "content-type": "application/json",
+      "cookie": login.cookie,
+    },
+    body: JSON.stringify({
+      name: `${tagName} Missing Origin`,
+      category: "GENERAL",
+    }),
+  });
+  assert.equal(missingOriginResponse.status, 403);
+  await missingOriginResponse.text();
+
+  const disallowedOriginResponse = await fetch(`${baseUrl}/tags`, {
+    method: "POST",
+    headers: {
+      "content-type": "application/json",
+      "cookie": login.cookie,
+      "origin": "https://evil.example",
+    },
+    body: JSON.stringify({
+      name: `${tagName} Disallowed Origin`,
+      category: "GENERAL",
+    }),
+  });
+  assert.equal(disallowedOriginResponse.status, 403);
+  await disallowedOriginResponse.text();
+
+  const deleteCreatedTagResponse = await fetch(`${baseUrl}/tags/${createdTag.id}`, {
+    method: "DELETE",
+    headers: {
+      "authorization": `Bearer ${login.token}`,
+    },
+  });
+  assert.equal(deleteCreatedTagResponse.status, 204);
+  await deleteCreatedTagResponse.text();
+
+  const logoutResponse = await fetch(`${baseUrl}/auth/logout`, {
+    method: "POST",
+    headers: {
+      "cookie": login.cookie,
+    },
+  });
+  assert.equal(logoutResponse.status, 204);
+  assert.match(logoutResponse.headers.get("set-cookie") ?? "", /Max-Age=0/);
+  await logoutResponse.text();
 });
 
 Deno.test("API supports resource lists, record upsert, today lookup, and dump export", async () => {
@@ -353,6 +440,10 @@ Deno.test("API rejects invalid DTO payloads", async () => {
 });
 
 async function getApiToken(): Promise<string> {
+  return (await getApiLogin()).token;
+}
+
+async function getApiLogin(): Promise<{ cookie: string; setCookie: string; token: string }> {
   const loginResponse = await fetch(`${baseUrl}/auth/login`, {
     method: "POST",
     headers: {
@@ -367,7 +458,13 @@ async function getApiToken(): Promise<string> {
 
   const login = await loginResponse.json() as { token: string };
   assert.ok(login.token);
-  return login.token;
+  const cookie = loginResponse.headers.get("set-cookie");
+  assert.ok(cookie);
+  return {
+    cookie: cookie.split(";")[0],
+    setCookie: cookie,
+    token: login.token,
+  };
 }
 
 async function assertOk(url: string, token: string): Promise<void> {
@@ -394,6 +491,14 @@ function authHeaders(token: string): RequestInit {
   return {
     headers: {
       "authorization": `Bearer ${token}`
+    }
+  };
+}
+
+function cookieHeaders(cookie: string): RequestInit {
+  return {
+    headers: {
+      cookie
     }
   };
 }
