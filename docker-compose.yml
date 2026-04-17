@@ -1,5 +1,5 @@
 services:
-  db:
+  db_health:
     image: postgres:16-alpine
     environment:
       POSTGRES_DB: ${POSTGRES_DB}
@@ -8,7 +8,12 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "PGPASSWORD=\"$${POSTGRES_PASSWORD}\" psql -U \"$${POSTGRES_USER}\" -d \"$${POSTGRES_DB}\" -c 'SELECT 1' >/dev/null"]
+      test:
+        [
+          "CMD-SHELL",
+          "PGPASSWORD=\"$${POSTGRES_PASSWORD}\" psql -U \"$${POSTGRES_USER}\"
+            -d \"$${POSTGRES_DB}\" -c 'SELECT 1' >/dev/null",
+        ]
       interval: 5s
       timeout: 5s
       retries: 10
@@ -32,7 +37,7 @@ services:
       AUTH_COOKIE_SAME_SITE: ${AUTH_COOKIE_SAME_SITE:-lax}
       AUTH_COOKIE_MAX_AGE_SECONDS: ${AUTH_COOKIE_MAX_AGE_SECONDS:-3600}
     depends_on:
-      db:
+      db_health:
         condition: service_healthy
     networks:
       - backend
