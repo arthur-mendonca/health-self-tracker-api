@@ -169,7 +169,7 @@ docker exec <API_CONTAINER> sh -lc 'printf "%s\n" "$DATABASE_URL" | sed -E "s#(p
 Testar a conexão a partir do container da API usando a própria `DATABASE_URL` da API:
 
 ```bash
-docker exec <API_CONTAINER> sh -lc 'deno eval -A "import pg from \"npm:pg@8.16.3\"; const client = new pg.Client({ connectionString: Deno.env.get(\"DATABASE_URL\") }); await client.connect(); const result = await client.query(\"select current_user, current_database()\"); console.log(result.rows); await client.end();"'
+docker exec <API_CONTAINER> sh -lc 'deno eval "import { Client } from \"npm:pg@8.16.3\"; const client = new Client({ connectionString: Deno.env.get(\"DATABASE_URL\") }); await client.connect(); const result = await client.query(\"select current_user, current_database()\"); console.log(result.rows); await client.end();"'
 ```
 
 Ver variáveis efetivas do container do Postgres sem revelar a senha:
