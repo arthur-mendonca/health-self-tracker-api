@@ -20,7 +20,7 @@ httpAdapterInstance.set?.("etag", false);
 app.enableCors({
   allowedHeaders: ["Authorization", "Content-Type", "X-Request-Id"],
   credentials: true,
-  exposedHeaders: ["X-Request-Id"],
+  exposedHeaders: ["X-Request-Id", "X-App-Instance-Id"],
   methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
   origin: (origin, callback) => {
     callback(null, isCorsOriginAllowed(origin));

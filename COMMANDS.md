@@ -154,6 +154,40 @@ Depois de corrigir a senha real do role usado pelo `DATABASE_URL`, reinicie a AP
 docker compose restart api
 ```
 
+Em servidores onde o app foi gerado pelo Coolify e `docker compose` não encontra o arquivo de configuração, use `docker exec` com os nomes reais dos containers:
+
+```bash
+docker ps --format 'table {{.ID}}\t{{.Names}}\t{{.Image}}\t{{.Status}}'
+```
+
+Ver `DATABASE_URL` efetiva dentro da API sem revelar a senha:
+
+```bash
+docker exec <API_CONTAINER> sh -lc 'printf "%s\n" "$DATABASE_URL" | sed -E "s#(postgresql://[^:]+:)[^@]+(@.*)#\1***\2#"'
+```
+
+Testar a conexão a partir do container da API usando a própria `DATABASE_URL` da API:
+
+```bash
+docker exec <API_CONTAINER> sh -lc 'deno eval -A "import pg from \"npm:pg@8.16.3\"; const client = new pg.Client({ connectionString: Deno.env.get(\"DATABASE_URL\") }); await client.connect(); const result = await client.query(\"select current_user, current_database()\"); console.log(result.rows); await client.end();"'
+```
+
+Ver variáveis efetivas do container do Postgres sem revelar a senha:
+
+```bash
+docker exec <DB_CONTAINER> sh -lc 'echo "POSTGRES_USER=$POSTGRES_USER"; echo "POSTGRES_DB=$POSTGRES_DB"; echo "POSTGRES_PASSWORD_LENGTH=${#POSTGRES_PASSWORD}"'
+```
+
+Reiniciar a API depois de qualquer alteração de credencial do banco:
+
+```bash
+docker restart <API_CONTAINER>
+```
+
+Se houver mais de um container da API atrás do proxy, reinicie todos. Um container antigo com `DATABASE_URL` diferente pode causar falhas intermitentes enquanto outro container responde `200`.
+
+A API também inclui `appInstanceId` nos logs, nas respostas de erro e no header `X-App-Instance-Id`. Se respostas `500` e `200` alternarem com `appInstanceId` diferente, o problema está em múltiplas instâncias/containers com configuração divergente.
+
 ## Testes
 
 Rodar testes unitários localmente:

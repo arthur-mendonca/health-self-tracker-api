@@ -7,6 +7,8 @@ import {
   Logger,
 } from "npm:@nestjs/common@10.4.15";
 
+import { appInstanceId } from "./app-instance.ts";
+
 type RequestLike = {
   method?: string;
   originalUrl?: string;
@@ -44,6 +46,7 @@ export class HttpExceptionFilter implements ExceptionFilter {
       method: request.method,
       path: request.originalUrl ?? request.url,
       requestId,
+      appInstanceId,
       statusCode,
       timestamp: new Date().toISOString(),
     };

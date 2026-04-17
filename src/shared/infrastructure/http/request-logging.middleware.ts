@@ -1,5 +1,7 @@
 import { Logger } from "npm:@nestjs/common@10.4.15";
 
+import { appInstanceId } from "./app-instance.ts";
+
 type HeaderValue = string | string[] | undefined;
 
 type RequestLike = {
@@ -31,6 +33,7 @@ export function requestLoggingMiddleware(
 
   request.requestId = requestId;
   response.setHeader("X-Request-Id", requestId);
+  response.setHeader("X-App-Instance-Id", appInstanceId);
 
   response.once("finish", () => {
     const durationMs = Math.round((performance.now() - startedAt) * 100) / 100;
@@ -43,6 +46,7 @@ export function requestLoggingMiddleware(
       origin: getFirstHeader(request.headers.origin),
       path: request.originalUrl ?? request.url,
       requestId,
+      appInstanceId,
       statusCode,
       userAgent: getFirstHeader(request.headers["user-agent"]),
     };
