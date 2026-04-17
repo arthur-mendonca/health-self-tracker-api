@@ -98,6 +98,22 @@ Deno.test("API supports cookie sessions alongside bearer tokens", async () => {
   await logoutResponse.text();
 });
 
+Deno.test("API disables cache revalidation for authenticated GETs", async () => {
+  const token = await getApiToken();
+  const response = await fetch(`${baseUrl}/tags`, {
+    headers: {
+      "authorization": `Bearer ${token}`,
+      "if-none-match": '"stale-client-etag"',
+    },
+  });
+
+  assert.equal(response.status, 200);
+  assert.equal(response.headers.get("cache-control"), "no-store");
+  assert.equal(response.headers.get("pragma"), "no-cache");
+  assert.equal(response.headers.get("expires"), "0");
+  await response.text();
+});
+
 Deno.test("API supports resource lists, record upsert, today lookup, and dump export", async () => {
   const token = await getApiToken();
 

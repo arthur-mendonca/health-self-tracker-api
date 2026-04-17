@@ -1,5 +1,4 @@
 import {
-  BadRequestException,
   Body,
   Controller,
   Delete,
@@ -18,6 +17,7 @@ import { UpdateActivityService } from "../../../application/use-cases/UpdateActi
 import { Activity } from "../../../domain/entities/Activity.ts";
 import { CreateActivityDto } from "../dtos/CreateActivityDto.ts";
 import { UpdateActivityDto } from "../dtos/UpdateActivityDto.ts";
+import { rethrowAsHttpError } from "../../../../../shared/infrastructure/http/domain-error.ts";
 
 @Controller("activities")
 export class ActivityController {
@@ -40,7 +40,7 @@ export class ActivityController {
       const activity = await this.createActivityService.execute(body);
       return toResponse(activity);
     } catch (error) {
-      throw new BadRequestException(error instanceof Error ? error.message : "Invalid activity payload.");
+      rethrowAsHttpError(error, "Invalid activity payload.");
     }
   }
 
@@ -58,11 +58,7 @@ export class ActivityController {
 
       return toResponse(activity);
     } catch (error) {
-      if (error instanceof NotFoundException) {
-        throw error;
-      }
-
-      throw new BadRequestException(error instanceof Error ? error.message : "Invalid activity payload.");
+      rethrowAsHttpError(error, "Invalid activity payload.");
     }
   }
 

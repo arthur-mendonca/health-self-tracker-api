@@ -1,5 +1,4 @@
 import {
-  BadRequestException,
   Body,
   Controller,
   Get,
@@ -12,6 +11,7 @@ import { ListDailyRecordsService } from "../../../application/use-cases/ListDail
 import { UpsertDailyRecordService } from "../../../application/use-cases/UpsertDailyRecordService.ts";
 import { DailyRecordHttpMapper } from "../mappers/DailyRecordHttpMapper.ts";
 import { UpsertDailyRecordDto } from "../dtos/UpsertDailyRecordDto.ts";
+import { rethrowAsHttpError } from "../../../../../shared/infrastructure/http/domain-error.ts";
 
 @Controller("records")
 export class DailyRecordController {
@@ -27,11 +27,7 @@ export class DailyRecordController {
       const record = await this.upsertDailyRecordService.execute(body);
       return DailyRecordHttpMapper.toResponse(record);
     } catch (error) {
-      throw new BadRequestException(
-        error instanceof Error
-          ? error.message
-          : "Invalid daily record payload.",
-      );
+      rethrowAsHttpError(error, "Invalid daily record payload.");
     }
   }
 
@@ -55,9 +51,7 @@ export class DailyRecordController {
       });
       return records.map(DailyRecordHttpMapper.toResponse);
     } catch (error) {
-      throw new BadRequestException(
-        error instanceof Error ? error.message : "Invalid daily record query.",
-      );
+      rethrowAsHttpError(error, "Invalid daily record query.");
     }
   }
 }

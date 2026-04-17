@@ -49,6 +49,7 @@ export class HttpExceptionFilter implements ExceptionFilter {
     };
     const logBody = {
       ...responseBody,
+      cause: summarizeException(exception),
       exceptionName:
         exception instanceof Error ? exception.name : typeof exception,
     };
@@ -56,7 +57,7 @@ export class HttpExceptionFilter implements ExceptionFilter {
     if (statusCode >= 500) {
       this.logger.error(
         JSON.stringify(logBody),
-        exception instanceof Error ? exception.stack : undefined,
+        exception instanceof Error ? sanitizeForLog(exception.stack) : undefined,
       );
     } else {
       this.logger.warn(JSON.stringify(logBody));
@@ -94,6 +95,12 @@ function normalizeErrorResponse(
   }
 
   if (exception instanceof Error) {
+    const infrastructureError = classifyInfrastructureError(exception);
+
+    if (infrastructureError) {
+      return infrastructureError;
+    }
+
     return {
       error:
         statusCode === HttpStatus.INTERNAL_SERVER_ERROR
@@ -116,4 +123,55 @@ function isErrorResponseObject(
   value: unknown,
 ): value is Partial<ErrorResponseBody> {
   return typeof value === "object" && value !== null;
+}
+
+function classifyInfrastructureError(error: Error): ErrorResponseBody | null {
+  const message = error.message;
+
+  if (message.includes("Authentication failed against the database server")) {
+    return {
+      error: "Database Authentication Error",
+      message:
+        "Database authentication failed for the configured user. Check DATABASE_URL and POSTGRES credentials on the server.",
+    };
+  }
+
+  if (
+    message.includes("Can't reach database server") ||
+    message.includes("Timed out fetching a new connection") ||
+    message.includes("Connection terminated") ||
+    message.includes("ECONNREFUSED") ||
+    message.includes("ENOTFOUND")
+  ) {
+    return {
+      error: "Database Connection Error",
+      message:
+        "The API could not connect to the database. Check database host, port, credentials, and container/network health.",
+    };
+  }
+
+  return null;
+}
+
+function summarizeException(exception: unknown): string {
+  if (exception instanceof Error) {
+    return sanitizeForLog(exception.message);
+  }
+
+  if (typeof exception === "string") {
+    return sanitizeForLog(exception);
+  }
+
+  return typeof exception;
+}
+
+function sanitizeForLog(value: string | undefined): string {
+  if (!value) {
+    return "";
+  }
+
+  return value
+    .replace(/postgres(?:ql)?:\/\/[^@\s]+@/gi, "postgresql://[redacted]@")
+    .replace(/(password|token|secret|cookie)=([^&\s]+)/gi, "$1=[redacted]")
+    .replace(/(password|token|secret|cookie)["']?\s*:\s*["'][^"']+["']/gi, "$1: [redacted]");
 }

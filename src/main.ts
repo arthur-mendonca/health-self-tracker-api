@@ -10,6 +10,13 @@ import { requestLoggingMiddleware } from "./shared/infrastructure/http/request-l
 
 const app = await NestFactory.create(AppModule);
 
+const httpAdapterInstance = app.getHttpAdapter().getInstance() as {
+  disable?: (setting: string) => void;
+  set?: (setting: string, value: unknown) => void;
+};
+httpAdapterInstance.disable?.("etag");
+httpAdapterInstance.set?.("etag", false);
+
 app.enableCors({
   allowedHeaders: ["Authorization", "Content-Type", "X-Request-Id"],
   credentials: true,
@@ -18,6 +25,12 @@ app.enableCors({
   origin: (origin, callback) => {
     callback(null, isCorsOriginAllowed(origin));
   },
+});
+app.use((_request: unknown, response: ResponseLike, next: NextFunctionLike) => {
+  response.setHeader("Cache-Control", "no-store");
+  response.setHeader("Pragma", "no-cache");
+  response.setHeader("Expires", "0");
+  next();
 });
 app.use(requestLoggingMiddleware);
 app.useGlobalFilters(new HttpExceptionFilter());
@@ -31,3 +44,9 @@ app.useGlobalPipes(
 
 const port = Number(Deno.env.get("PORT") ?? 3000);
 await app.listen(port);
+
+type ResponseLike = {
+  setHeader(name: string, value: string): void;
+};
+
+type NextFunctionLike = () => void;

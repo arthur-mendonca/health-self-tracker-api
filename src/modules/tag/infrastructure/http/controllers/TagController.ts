@@ -1,5 +1,4 @@
 import {
-  BadRequestException,
   Body,
   Controller,
   Delete,
@@ -18,6 +17,7 @@ import { UpdateTagService } from "../../../application/use-cases/UpdateTagServic
 import { Tag } from "../../../domain/entities/Tag.ts";
 import { CreateTagDto } from "../dtos/CreateTagDto.ts";
 import { UpdateTagDto } from "../dtos/UpdateTagDto.ts";
+import { rethrowAsHttpError } from "../../../../../shared/infrastructure/http/domain-error.ts";
 
 @Controller("tags")
 export class TagController {
@@ -40,7 +40,7 @@ export class TagController {
       const tag = await this.createTagService.execute(body);
       return toResponse(tag);
     } catch (error) {
-      throw new BadRequestException(error instanceof Error ? error.message : "Invalid tag payload.");
+      rethrowAsHttpError(error, "Invalid tag payload.");
     }
   }
 
@@ -58,11 +58,7 @@ export class TagController {
 
       return toResponse(tag);
     } catch (error) {
-      if (error instanceof NotFoundException) {
-        throw error;
-      }
-
-      throw new BadRequestException(error instanceof Error ? error.message : "Invalid tag payload.");
+      rethrowAsHttpError(error, "Invalid tag payload.");
     }
   }
 

@@ -83,6 +83,8 @@ Parar containers e remover volume do banco:
 docker compose down -v
 ```
 
+> Atenção: `docker compose down -v` remove o volume `postgres_data` e apaga os dados locais do banco.
+
 ## Rodar Localmente
 
 Requer Deno instalado no host e um PostgreSQL acessível pela `DATABASE_URL`.
@@ -131,6 +133,25 @@ Para aplicar migrations manualmente no container:
 
 ```bash
 docker compose exec api deno task prisma:migrate:deploy
+```
+
+### Troubleshooting de credenciais do Postgres
+
+Se os logs mostrarem `Authentication failed against the database server`, não remova o volume do banco. Em deployments como Coolify, confirme que estas variáveis estão coerentes entre API e Postgres:
+
+```text
+DATABASE_URL
+POSTGRES_USER
+POSTGRES_PASSWORD
+POSTGRES_DB
+AUTH_USER_EMAIL
+AUTH_USER_PASSWORD
+```
+
+Depois de corrigir a senha real do role usado pelo `DATABASE_URL`, reinicie a API para descartar conexões antigas do pool:
+
+```bash
+docker compose restart api
 ```
 
 ## Testes

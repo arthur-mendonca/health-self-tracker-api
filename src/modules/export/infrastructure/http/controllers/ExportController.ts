@@ -1,7 +1,6 @@
 import { Buffer } from "node:buffer";
 
 import {
-  BadRequestException,
   Controller,
   Get,
   Query,
@@ -10,6 +9,7 @@ import {
 
 import type { ExportDumpQuery } from "../../../application/ports/in/ExportDumpUseCase.ts";
 import { ExportDumpService } from "../../../application/use-cases/ExportDumpService.ts";
+import { rethrowAsHttpError } from "../../../../../shared/infrastructure/http/domain-error.ts";
 
 @Controller("export")
 export class ExportController {
@@ -20,9 +20,7 @@ export class ExportController {
     try {
       return await this.exportDumpService.execute(query);
     } catch (error) {
-      throw new BadRequestException(
-        error instanceof Error ? error.message : "Invalid export query.",
-      );
+      rethrowAsHttpError(error, "Invalid export query.");
     }
   }
 
@@ -40,9 +38,7 @@ export class ExportController {
       );
       response.send(JSON.stringify(dump, null, 2));
     } catch (error) {
-      throw new BadRequestException(
-        error instanceof Error ? error.message : "Invalid export query.",
-      );
+      rethrowAsHttpError(error, "Invalid export query.");
     }
   }
 
@@ -61,9 +57,7 @@ export class ExportController {
       );
       response.send(csv);
     } catch (error) {
-      throw new BadRequestException(
-        error instanceof Error ? error.message : "Invalid export query.",
-      );
+      rethrowAsHttpError(error, "Invalid export query.");
     }
   }
 
@@ -82,9 +76,7 @@ export class ExportController {
       );
       response.send(text);
     } catch (error) {
-      throw new BadRequestException(
-        error instanceof Error ? error.message : "Invalid export query.",
-      );
+      rethrowAsHttpError(error, "Invalid export query.");
     }
   }
 
@@ -103,9 +95,7 @@ export class ExportController {
       );
       response.send(Buffer.from(pdf));
     } catch (error) {
-      throw new BadRequestException(
-        error instanceof Error ? error.message : "Invalid export query.",
-      );
+      rethrowAsHttpError(error, "Invalid export query.");
     }
   }
 }

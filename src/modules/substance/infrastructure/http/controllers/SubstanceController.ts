@@ -1,5 +1,4 @@
 import {
-  BadRequestException,
   Body,
   Controller,
   Delete,
@@ -18,6 +17,7 @@ import { UpdateSubstanceService } from "../../../application/use-cases/UpdateSub
 import { Substance } from "../../../domain/entities/Substance.ts";
 import { CreateSubstanceDto } from "../dtos/CreateSubstanceDto.ts";
 import { UpdateSubstanceDto } from "../dtos/UpdateSubstanceDto.ts";
+import { rethrowAsHttpError } from "../../../../../shared/infrastructure/http/domain-error.ts";
 
 @Controller("substances")
 export class SubstanceController {
@@ -40,7 +40,7 @@ export class SubstanceController {
       const substance = await this.createSubstanceService.execute(body);
       return toResponse(substance);
     } catch (error) {
-      throw new BadRequestException(error instanceof Error ? error.message : "Invalid substance payload.");
+      rethrowAsHttpError(error, "Invalid substance payload.");
     }
   }
 
@@ -58,11 +58,7 @@ export class SubstanceController {
 
       return toResponse(substance);
     } catch (error) {
-      if (error instanceof NotFoundException) {
-        throw error;
-      }
-
-      throw new BadRequestException(error instanceof Error ? error.message : "Invalid substance payload.");
+      rethrowAsHttpError(error, "Invalid substance payload.");
     }
   }
 
